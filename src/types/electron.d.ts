@@ -39,6 +39,13 @@ export interface ElectronAPI {
   triggerMoveRight: () => Promise<{ success: boolean; error?: string }>
   triggerMoveUp: () => Promise<{ success: boolean; error?: string }>
   triggerMoveDown: () => Promise<{ success: boolean; error?: string }>
+  
+  // Click-through functionality
+  enableClickThrough: () => Promise<{ success: boolean; error?: string }>
+  disableClickThrough: () => Promise<{ success: boolean; error?: string }>
+  toggleClickThrough: () => Promise<{ success: boolean; clickThroughEnabled?: boolean; error?: string }>
+  getClickThroughState: () => Promise<{ success: boolean; clickThroughEnabled?: boolean; error?: string }>
+  
   onSubscriptionUpdated: (callback: () => void) => () => void
   onSubscriptionPortalClosed: (callback: () => void) => () => void
   startUpdate: () => Promise<{ success: boolean; error?: string }>

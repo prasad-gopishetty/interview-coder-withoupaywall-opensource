@@ -57,6 +57,7 @@ All it takes is modest JavaScript/TypeScript knowledge and understanding of the 
 - 💡 Solution Generation: Get detailed explanations and solutions with time/space complexity analysis
 - 🔧 Real-time Debugging: Debug your code with AI assistance and structured feedback
 - 🎨 Advanced Window Management: Freely move, resize, change opacity, and zoom the window
+- 🖱️ Click-through Mode: Auto-enabled when solutions are generated, allowing clicks to pass through to the app behind
 - 🔄 Model Selection: Choose between GPT-4o and GPT-4o-mini for different processing stages
 - 🔒 Privacy-Focused: Your API key and data never leave your computer except for OpenAI API calls
 
@@ -70,6 +71,7 @@ The application uses unidentifiable global keyboard shortcuts that won't be dete
 - Delete Last Screenshot: [Control or Cmd + L]
 - Process Screenshots: [Control or Cmd + Enter]
 - Start New Problem: [Control or Cmd + R]
+- Toggle Click-through: [Control or Cmd + T] or [ESC to disable]
 - Quit: [Control or Cmd + Q]
 - Decrease Opacity: [Control or Cmd + []
 - Increase Opacity: [Control or Cmd + ]]
@@ -245,6 +247,7 @@ The packaged applications will be available in the `release` directory.
    - Move window using [Control or Cmd + Arrow keys]
    - Toggle visibility with [Control or Cmd + B]
    - Adjust opacity with [Control or Cmd + [] and [Control or Cmd + ]]
+   - Toggle click-through mode with [Control or Cmd + T] (auto-enabled when solutions are generated, ESC to disable)
    - Window remains invisible to specified screen sharing applications
    - Start a new problem using [Control or Cmd + R]
 

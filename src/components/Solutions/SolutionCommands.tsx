@@ -38,6 +38,7 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
   setLanguage
 }) => {
   const [isTooltipVisible, setIsTooltipVisible] = useState(false)
+  const [isClickThroughEnabled, setIsClickThroughEnabled] = useState(false)
   const tooltipRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
 
@@ -50,6 +51,21 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
       onTooltipVisibilityChange(isTooltipVisible, tooltipHeight)
     }
   }, [isTooltipVisible, onTooltipVisibilityChange])
+
+  // Get initial click-through state
+  useEffect(() => {
+    const getInitialState = async () => {
+      try {
+        const result = await window.electronAPI.getClickThroughState()
+        if (result.success) {
+          setIsClickThroughEnabled(result.clickThroughEnabled || false)
+        }
+      } catch (error) {
+        console.error("Error getting click-through state:", error)
+      }
+    }
+    getInitialState()
+  }, [])
 
   const handleMouseEnter = () => {
     setIsTooltipVisible(true)
@@ -188,6 +204,44 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
               </button>
               <button className="bg-white/10 rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
                 R
+              </button>
+            </div>
+          </div>
+
+          {/* Click-through Toggle */}
+          <div
+            className={`flex items-center gap-2 cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors ${
+              isClickThroughEnabled ? 'bg-green-500/20 text-green-400' : ''
+            }`}
+            onClick={async () => {
+              try {
+                const result = await window.electronAPI.toggleClickThrough()
+                if (result.success) {
+                  setIsClickThroughEnabled(result.clickThroughEnabled || false)
+                  showToast(
+                    "Click-through",
+                    `Click-through ${result.clickThroughEnabled ? 'enabled' : 'disabled'}`,
+                    "neutral"
+                  )
+                } else {
+                  console.error("Failed to toggle click-through:", result.error)
+                  showToast("Error", "Failed to toggle click-through", "error")
+                }
+              } catch (error) {
+                console.error("Error toggling click-through:", error)
+                showToast("Error", "Failed to toggle click-through", "error")
+              }
+            }}
+          >
+            <span className="text-[11px] leading-none">
+              {isClickThroughEnabled ? "Click-through ON" : "Click-through OFF"}
+            </span>
+            <div className="flex gap-1">
+              <button className="bg-white/10 rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+                Click
+              </button>
+              <button className="bg-white/10 rounded-md px-1.5 py-1 text-[11px] leading-none text-white/70">
+                Through
               </button>
             </div>
           </div>
@@ -405,6 +459,46 @@ const SolutionCommands: React.FC<SolutionCommandsProps> = ({
                         </div>
                         <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
                           Start fresh with a new question.
+                        </p>
+                      </div>
+
+                      {/* Click-through Toggle - Always visible */}
+                      <div
+                        className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors"
+                        onClick={async () => {
+                          try {
+                            const result =
+                              await window.electronAPI.toggleClickThrough()
+                            if (result.success) {
+                              setIsClickThroughEnabled(result.clickThroughEnabled || false)
+                              showToast(
+                                "Click-through",
+                                `Click-through ${result.clickThroughEnabled ? 'enabled' : 'disabled'}`,
+                                "neutral"
+                              )
+                            } else {
+                              console.error("Failed to toggle click-through:", result.error)
+                              showToast("Error", "Failed to toggle click-through", "error")
+                            }
+                          } catch (error) {
+                            console.error("Error toggling click-through:", error)
+                            showToast("Error", "Failed to toggle click-through", "error")
+                          }
+                        }}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="truncate">Toggle Click-through</span>
+                          <div className="flex gap-1 flex-shrink-0">
+                            <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                              {COMMAND_KEY}
+                            </span>
+                            <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                              T
+                            </span>
+                          </div>
+                        </div>
+                        <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
+                          Allow clicks to pass through the app window. Press ESC to disable.
                         </p>
                       </div>
                     </div>

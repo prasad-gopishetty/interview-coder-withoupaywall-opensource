@@ -34,6 +34,9 @@ const state = {
   view: "queue" as "queue" | "solutions" | "debug",
   problemInfo: null as any,
   hasDebugged: false,
+  
+  // Click-through state
+  isClickThroughEnabled: false,
 
   // Processing events
   PROCESSING_EVENTS: {
@@ -69,6 +72,8 @@ export interface IProcessingHelperDeps {
   ) => Promise<{ success: boolean; error?: string }>
   setHasDebugged: (value: boolean) => void
   getHasDebugged: () => boolean
+  enableClickThrough: () => void
+  disableClickThrough: () => void
   PROCESSING_EVENTS: typeof state.PROCESSING_EVENTS
 }
 
@@ -85,6 +90,8 @@ export interface IShortcutsHelperDeps {
   moveWindowRight: () => void
   moveWindowUp: () => void
   moveWindowDown: () => void
+  toggleClickThrough: () => boolean
+  getClickThroughState: () => boolean
 }
 
 export interface IIpcHandlerDeps {
@@ -107,6 +114,10 @@ export interface IIpcHandlerDeps {
   moveWindowRight: () => void
   moveWindowUp: () => void
   moveWindowDown: () => void
+  enableClickThrough: () => void
+  disableClickThrough: () => void
+  toggleClickThrough: () => boolean
+  getClickThroughState: () => boolean
 }
 
 // Initialize helpers
@@ -127,6 +138,8 @@ function initializeHelpers() {
     deleteScreenshot,
     setHasDebugged,
     getHasDebugged,
+    enableClickThrough,
+    disableClickThrough,
     PROCESSING_EVENTS: state.PROCESSING_EVENTS
   } as IProcessingHelperDeps)
   state.shortcutsHelper = new ShortcutsHelper({
@@ -150,7 +163,9 @@ function initializeHelpers() {
         )
       ),
     moveWindowUp: () => moveWindowVertical((y) => y - state.step),
-    moveWindowDown: () => moveWindowVertical((y) => y + state.step)
+    moveWindowDown: () => moveWindowVertical((y) => y + state.step),
+    toggleClickThrough,
+    getClickThroughState
   } as IShortcutsHelperDeps)
 }
 
@@ -470,6 +485,65 @@ function moveWindowVertical(updateFn: (y: number) => number): void {
   }
 }
 
+// Click-through functions
+function enableClickThrough(): void {
+  if (!state.mainWindow?.isDestroyed()) {
+    // Use setIgnoreMouseEvents with correct parameters to only ignore mouse events
+    // but keep the window focusable for keyboard shortcuts
+    state.mainWindow.setIgnoreMouseEvents(true, { forward: true })
+    // Ensure the window can still receive keyboard events by keeping it focusable
+    state.mainWindow.setFocusable(true)
+    state.isClickThroughEnabled = true
+    console.log('Click-through enabled - mouse events forwarded, keyboard shortcuts preserved')
+  }
+}
+
+function disableClickThrough(): void {
+  if (!state.mainWindow?.isDestroyed()) {
+    state.mainWindow.setIgnoreMouseEvents(false)
+    state.mainWindow.setFocusable(true)
+    state.isClickThroughEnabled = false
+    console.log('Click-through disabled')
+  }
+}
+
+function toggleClickThrough(): boolean {
+  if (!state.mainWindow?.isDestroyed()) {
+    const newState = !state.isClickThroughEnabled
+    
+    try {
+      if (newState) {
+        // Enable click-through
+        state.mainWindow.setIgnoreMouseEvents(true, { forward: true })
+        state.mainWindow.setFocusable(true)
+        console.log('Click-through enabled - mouse events forwarded')
+      } else {
+        // Disable click-through
+        state.mainWindow.setIgnoreMouseEvents(false)
+        state.mainWindow.setFocusable(true)
+        console.log('Click-through disabled - normal input restored')
+      }
+      
+      state.isClickThroughEnabled = newState
+      
+      // Add a small delay to ensure the window state changes are processed
+      setTimeout(() => {
+        console.log(`Click-through toggle completed. Current state: ${state.isClickThroughEnabled}`)
+      }, 100)
+      
+      return newState
+    } catch (error) {
+      console.error('Error toggling click-through:', error)
+      return state.isClickThroughEnabled
+    }
+  }
+  return false
+}
+
+function getClickThroughState(): boolean {
+  return state.isClickThroughEnabled
+}
+
 // Window dimension functions
 function setWindowDimensions(width: number, height: number): void {
   if (!state.mainWindow?.isDestroyed()) {
@@ -557,7 +631,11 @@ async function initializeApp() {
           )
         ),
       moveWindowUp: () => moveWindowVertical((y) => y - state.step),
-      moveWindowDown: () => moveWindowVertical((y) => y + state.step)
+      moveWindowDown: () => moveWindowVertical((y) => y + state.step),
+      enableClickThrough,
+      disableClickThrough,
+      toggleClickThrough,
+      getClickThroughState
     })
     await createWindow()
     state.shortcutsHelper?.registerGlobalShortcuts()
@@ -649,6 +727,10 @@ function getExtraScreenshotQueue(): string[] {
 function clearQueues(): void {
   state.screenshotHelper?.clearQueues()
   state.problemInfo = null
+  
+  // Disable click-through when going back to queue
+  disableClickThrough()
+  
   setView("queue")
 }
 
@@ -708,7 +790,11 @@ export {
   getImagePreview,
   deleteScreenshot,
   setHasDebugged,
-  getHasDebugged
+  getHasDebugged,
+  enableClickThrough,
+  disableClickThrough,
+  toggleClickThrough,
+  getClickThroughState
 }
 
 app.whenReady().then(initializeApp)

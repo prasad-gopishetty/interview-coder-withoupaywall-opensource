@@ -8,6 +8,7 @@ echo - Toggle Visibility: Ctrl+B (or Cmd+B on Mac)
 echo - Take Screenshot: Ctrl+H
 echo - Process Screenshots: Ctrl+Enter
 echo - Move Window: Ctrl+Arrows (Left/Right/Up/Down)
+echo - Toggle Click-through: Ctrl+T (auto-enabled when solutions show, ESC to disable)
 echo - Adjust Opacity: Ctrl+[ (decrease) / Ctrl+] (increase)
 echo - Reset View: Ctrl+R
 echo - Quit App: Ctrl+Q

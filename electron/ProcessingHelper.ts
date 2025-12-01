@@ -332,6 +332,7 @@ export class ProcessingHelper {
         }
         // Reset view back to queue on error
         console.log("Resetting view to queue due to error")
+        this.deps.disableClickThrough() // Disable click-through on error
         this.deps.setView("queue")
       } finally {
         this.currentProcessingAbortController = null
@@ -665,6 +666,10 @@ export class ProcessingHelper {
             message: "Solution generated successfully",
             progress: 100
           });
+          
+          // Enable click-through when solution is generated
+          console.log("Enabling click-through mode for solution viewing")
+          this.deps.enableClickThrough();
           
           mainWindow.webContents.send(
             this.deps.PROCESSING_EVENTS.SOLUTION_SUCCESS,

@@ -156,6 +156,13 @@ const electronAPI = {
   triggerMoveRight: () => ipcRenderer.invoke("trigger-move-right"),
   triggerMoveUp: () => ipcRenderer.invoke("trigger-move-up"),
   triggerMoveDown: () => ipcRenderer.invoke("trigger-move-down"),
+  
+  // Click-through functionality
+  enableClickThrough: () => ipcRenderer.invoke("enable-click-through"),
+  disableClickThrough: () => ipcRenderer.invoke("disable-click-through"),
+  toggleClickThrough: () => ipcRenderer.invoke("toggle-click-through"),
+  getClickThroughState: () => ipcRenderer.invoke("get-click-through-state"),
+  
   onSubscriptionUpdated: (callback: () => void) => {
     const subscription = () => callback()
     ipcRenderer.on("subscription-updated", subscription)

@@ -122,6 +122,34 @@ export class ShortcutsHelper {
       this.adjustOpacity(0.1)
     })
     
+    // Click-through toggle shortcut
+    globalShortcut.register("CommandOrControl+T", () => {
+      console.log("Command/Ctrl + T pressed. Toggling click-through mode.")
+      try {
+        const newState = this.deps.toggleClickThrough()
+        console.log(`Click-through ${newState ? 'enabled' : 'disabled'}`)
+      } catch (error) {
+        console.error("Error toggling click-through from shortcut:", error)
+      }
+    })
+    
+    // Alternative shortcut for disabling click-through (ESC key)
+    globalShortcut.register("Escape", () => {
+      console.log("ESC pressed. Checking if click-through is enabled...")
+      try {
+        const isClickThroughEnabled = this.deps.getClickThroughState()
+        if (isClickThroughEnabled) {
+          console.log("Click-through is enabled, disabling via ESC key...")
+          const newState = this.deps.toggleClickThrough()
+          console.log(`Click-through disabled via ESC key. New state: ${newState}`)
+        } else {
+          console.log("Click-through is not enabled, ESC key ignored.")
+        }
+      } catch (error) {
+        console.error("Error handling ESC key:", error)
+      }
+    })
+    
     // Zoom controls
     globalShortcut.register("CommandOrControl+-", () => {
       console.log("Command/Ctrl + - pressed. Zooming out.")

@@ -319,6 +319,47 @@ export function initializeIpcHandlers(deps: IIpcHandlerDeps): void {
     }
   })
   
+  // Click-through handlers
+  ipcMain.handle("enable-click-through", () => {
+    try {
+      deps.enableClickThrough()
+      return { success: true }
+    } catch (error) {
+      console.error("Error enabling click-through:", error)
+      return { success: false, error: "Failed to enable click-through" }
+    }
+  })
+
+  ipcMain.handle("disable-click-through", () => {
+    try {
+      deps.disableClickThrough()
+      return { success: true }
+    } catch (error) {
+      console.error("Error disabling click-through:", error)
+      return { success: false, error: "Failed to disable click-through" }
+    }
+  })
+
+  ipcMain.handle("toggle-click-through", () => {
+    try {
+      const newState = deps.toggleClickThrough()
+      return { success: true, clickThroughEnabled: newState }
+    } catch (error) {
+      console.error("Error toggling click-through:", error)
+      return { success: false, error: "Failed to toggle click-through" }
+    }
+  })
+
+  ipcMain.handle("get-click-through-state", () => {
+    try {
+      const state = deps.getClickThroughState()
+      return { success: true, clickThroughEnabled: state }
+    } catch (error) {
+      console.error("Error getting click-through state:", error)
+      return { success: false, error: "Failed to get click-through state" }
+    }
+  })
+  
   // Delete last screenshot handler
   ipcMain.handle("delete-last-screenshot", async () => {
     try {
