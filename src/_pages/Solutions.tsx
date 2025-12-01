@@ -500,10 +500,10 @@ const Solutions: React.FC<SolutionsProps> = ({
             setLanguage={setLanguage}
           />
 
-          {/* Main Content - Modified width constraints */}
+          {/* Main Content - Fixed scrolling */}
           <div className="w-full text-sm text-black bg-black/60 rounded-md">
             <div className="rounded-lg overflow-hidden">
-              <div className="px-4 py-3 space-y-4 max-w-full">
+              <div className="px-4 py-3 space-y-4 max-w-full max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                 {!solutionData && (
                   <>
                     <ContentSection

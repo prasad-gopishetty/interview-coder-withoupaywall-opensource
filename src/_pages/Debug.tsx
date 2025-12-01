@@ -288,7 +288,7 @@ const Debug: React.FC<DebugProps> = ({
       {/* Main Content */}
       <div className="w-full text-sm text-black bg-black/60 rounded-md">
         <div className="rounded-lg overflow-hidden">
-          <div className="px-4 py-3 space-y-4">
+          <div className="px-4 py-3 space-y-4 max-h-[70vh] overflow-y-auto scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
             {/* Thoughts Section */}
             <ContentSection
               title="What I Changed"
@@ -329,7 +329,7 @@ const Debug: React.FC<DebugProps> = ({
                   </div>
                 </div>
               ) : (
-                <div className="w-full bg-black/30 rounded-md p-4 text-[13px] leading-[1.4] text-gray-100 whitespace-pre-wrap overflow-auto max-h-[600px]">
+                <div className="w-full bg-black/30 rounded-md p-4 text-[13px] leading-[1.4] text-gray-100 whitespace-pre-wrap overflow-y-auto max-h-[400px] scrollbar-thin scrollbar-thumb-white/20 scrollbar-track-transparent">
                   {/* Process the debug analysis text by sections and lines */}
                   {(() => {
                     // First identify key sections based on common patterns in the debug output

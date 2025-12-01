@@ -45,5 +45,23 @@ export default {
       }
     }
   },
-  plugins: []
+  plugins: [
+    function({ addUtilities }) {
+      const newUtilities = {
+        '.scrollbar-thin': {
+          'scrollbar-width': 'thin',
+        },
+        '.scrollbar-none': {
+          'scrollbar-width': 'none',
+        },
+        '.scrollbar-thumb-white\\/20': {
+          '--scrollbar-thumb': 'rgba(255, 255, 255, 0.2)',
+        },
+        '.scrollbar-track-transparent': {
+          '--scrollbar-track': 'transparent',
+        }
+      }
+      addUtilities(newUtilities, ['responsive'])
+    }
+  ]
 }
