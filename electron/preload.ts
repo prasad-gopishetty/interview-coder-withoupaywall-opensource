@@ -243,7 +243,23 @@ const electronAPI = {
       ipcRenderer.removeListener("delete-last-screenshot", subscription)
     }
   },
-  deleteLastScreenshot: () => ipcRenderer.invoke("delete-last-screenshot")
+  deleteLastScreenshot: () => ipcRenderer.invoke("delete-last-screenshot"),
+
+  // Audio API
+  audio: {
+    startRecording: () => ipcRenderer.invoke("audio:start-recording"),
+    stopRecording: () => ipcRenderer.invoke("audio:stop-recording"),
+    transcribe: (audioData: Uint8Array, config: any) => 
+      ipcRenderer.invoke("audio:transcribe", audioData, config),
+    transcribeAudio: (base64Audio: string) => 
+      ipcRenderer.invoke("audio:transcribe-audio", base64Audio),
+    processQuestion: (transcript: string, config: any) => 
+      ipcRenderer.invoke("audio:process-question", transcript, config),
+    getDevices: () => ipcRenderer.invoke("audio:get-devices"),
+    saveConfig: (config: any) => ipcRenderer.invoke("audio:save-config", config),
+    loadConfig: () => ipcRenderer.invoke("audio:load-config"),
+    cleanup: () => ipcRenderer.invoke("audio:cleanup")
+  }
 }
 
 // Before exposing the API

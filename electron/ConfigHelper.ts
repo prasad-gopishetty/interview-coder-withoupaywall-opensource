@@ -13,6 +13,21 @@ interface Config {
   debuggingModel: string;
   language: string;
   opacity: number;
+  audioConfig?: AudioConfig; // Add audio configuration
+}
+
+interface AudioConfig {
+  inputDevice: string;
+  inputGain: number;
+  noiseReduction: boolean;
+  voiceActivation: boolean;
+  voiceActivationThreshold: number;
+  speechProvider: 'whisper' | 'browser';
+  language: string;
+  autoProcessVoice: boolean;
+  showTranscriptionRealTime: boolean;
+  enableWaveformVisualization: boolean;
+  transcriptionFontSize: 'small' | 'medium' | 'large';
 }
 
 export class ConfigHelper extends EventEmitter {

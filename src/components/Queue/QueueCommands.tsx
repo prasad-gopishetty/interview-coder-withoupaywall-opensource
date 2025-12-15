@@ -426,6 +426,50 @@ const QueueCommands: React.FC<QueueCommandsProps> = ({
                             : "No screenshots to delete."}
                         </p>
                       </div>
+                      
+                      {/* Voice Recording Commands */}
+                      <div className="border-t border-white/10 pt-3 mt-3">
+                        <h4 className="text-[10px] font-medium text-white/70 mb-2">Voice Input</h4>
+                        
+                        {/* Toggle Voice Recording */}
+                        <div className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <span className="truncate">Toggle Voice Recording</span>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                                {COMMAND_KEY}
+                              </span>
+                              <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                                M
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
+                            Start or stop voice recording for question capture.
+                          </p>
+                        </div>
+                        
+                        {/* Quick Voice Question */}
+                        <div className="cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors">
+                          <div className="flex items-center justify-between">
+                            <span className="truncate">Quick Voice Question</span>
+                            <div className="flex gap-1 flex-shrink-0">
+                              <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                                {COMMAND_KEY}
+                              </span>
+                              <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                                Shift
+                              </span>
+                              <span className="bg-white/20 px-1.5 py-0.5 rounded text-[10px] leading-none">
+                                M
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-[10px] leading-relaxed text-white/70 truncate mt-1">
+                            Record and automatically process voice question.
+                          </p>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Separator and Log Out */}

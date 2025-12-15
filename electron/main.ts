@@ -7,7 +7,31 @@ import { ScreenshotHelper } from "./ScreenshotHelper"
 import { ShortcutsHelper } from "./shortcuts"
 import { initAutoUpdater } from "./autoUpdater"
 import { configHelper } from "./ConfigHelper"
+import { audioHelper, AudioHelper, initializeAudioHelper } from "./AudioHelper"
 import * as dotenv from "dotenv"
+
+// Configure cache directory early to prevent permission issues
+const appDataPath = path.join(app.getPath('appData'), 'interview-coder-v1')
+const cachePath = path.join(appDataPath, 'cache')
+
+// Create cache directory if it doesn't exist
+try {
+  if (!fs.existsSync(cachePath)) {
+    fs.mkdirSync(cachePath, { recursive: true })
+  }
+  
+  // Set comprehensive Chromium command line switches to prevent cache issues
+  app.commandLine.appendSwitch('--disable-http-cache')
+  app.commandLine.appendSwitch('--disable-gpu-sandbox')
+  app.commandLine.appendSwitch('--no-sandbox')
+  app.commandLine.appendSwitch('--disable-dev-shm-usage')
+  app.commandLine.appendSwitch('--disable-software-rasterizer')
+  app.commandLine.appendSwitch('--disk-cache-size', '1')
+  app.commandLine.appendSwitch('--media-cache-size', '1')
+  app.commandLine.appendSwitch('--disk-cache-dir', cachePath)
+} catch (error) {
+  console.warn('Could not configure custom cache directory:', error)
+}
 
 // Constants
 const isDev = process.env.NODE_ENV === "development"
@@ -167,6 +191,9 @@ function initializeHelpers() {
     toggleClickThrough,
     getClickThroughState
   } as IShortcutsHelperDeps)
+  
+  // Initialize AudioHelper with ProcessingHelper - this sets up the IPC handlers
+  initializeAudioHelper(state.processingHelper)
 }
 
 // Auth callback handler
@@ -367,13 +394,15 @@ async function createWindow(): Promise<void> {
   const savedOpacity = configHelper.getOpacity();
   console.log(`Initial opacity from config: ${savedOpacity}`);
   
-  // Always make sure window is shown first
-  state.mainWindow.showInactive(); // Use showInactive for consistency
+  // Always make sure window is shown first and positioned properly
+  state.mainWindow.center(); // Center the window on screen
+  state.mainWindow.show(); // Use show() instead of showInactive()
+  state.mainWindow.focus(); // Make sure it gets focus
   
   if (savedOpacity <= 0.1) {
-    console.log('Initial opacity too low, setting to 0 and hiding window');
-    state.mainWindow.setOpacity(0);
-    state.isWindowVisible = false;
+    console.log('Initial opacity too low, setting to 0.5 for visibility');
+    state.mainWindow.setOpacity(0.5); // Set to 0.5 instead of 0 for debugging
+    state.isWindowVisible = true; // Keep as visible for debugging
   } else {
     console.log(`Setting initial opacity to ${savedOpacity}`);
     state.mainWindow.setOpacity(savedOpacity);
@@ -422,6 +451,9 @@ function showMainWindow(): void {
         ...state.windowPosition,
         ...state.windowSize
       });
+    } else {
+      // If no saved position, center the window
+      state.mainWindow.center();
     }
     state.mainWindow.setIgnoreMouseEvents(false);
     state.mainWindow.setAlwaysOnTop(true, "screen-saver", 1);
@@ -429,16 +461,23 @@ function showMainWindow(): void {
       visibleOnFullScreen: true
     });
     state.mainWindow.setContentProtection(true);
-    state.mainWindow.setOpacity(0); // Set opacity to 0 before showing
-    state.mainWindow.showInactive(); // Use showInactive instead of show+focus
-    state.mainWindow.setOpacity(1); // Then set opacity to 1 after showing
+    state.mainWindow.show(); // Use show() instead of showInactive()
+    state.mainWindow.setOpacity(1); // Set opacity to 1 for full visibility
+    state.mainWindow.focus(); // Make sure window gets focus
     state.isWindowVisible = true;
-    console.log('Window shown with showInactive(), opacity set to 1');
+    console.log('Window shown with show(), opacity set to 1, focused');
   }
 }
 
 function toggleMainWindow(): void {
   console.log(`Toggling window. Current state: ${state.isWindowVisible ? 'visible' : 'hidden'}`);
+  console.log(`Window exists: ${!!state.mainWindow}, Window destroyed: ${state.mainWindow?.isDestroyed()}`);
+  if (state.mainWindow && !state.mainWindow.isDestroyed()) {
+    console.log(`Current opacity: ${state.mainWindow.getOpacity()}`);
+    const bounds = state.mainWindow.getBounds();
+    console.log(`Window bounds: x=${bounds.x}, y=${bounds.y}, width=${bounds.width}, height=${bounds.height}`);
+  }
+  
   if (state.isWindowVisible) {
     hideMainWindow();
   } else {
@@ -579,7 +618,7 @@ function loadEnvVariables() {
 // Initialize application
 async function initializeApp() {
   try {
-    // Set custom cache directory to prevent permission issues
+    // Set user data paths (cache switches already set at top level)
     const appDataPath = path.join(app.getPath('appData'), 'interview-coder-v1')
     const sessionPath = path.join(appDataPath, 'session')
     const tempPath = path.join(appDataPath, 'temp')
@@ -592,9 +631,11 @@ async function initializeApp() {
       }
     }
     
+    // Set electron app paths
     app.setPath('userData', appDataPath)
-    app.setPath('sessionData', sessionPath)      
+    app.setPath('sessionData', sessionPath)
     app.setPath('temp', tempPath)
+    app.setPath('logs', path.join(appDataPath, 'logs'))
     app.setPath('cache', cachePath)
       
     loadEnvVariables()

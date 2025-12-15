@@ -95,7 +95,7 @@ const SolutionSection = ({
             }}
             wrapLongLines={true}
           >
-            {content as string}
+            {typeof content === 'string' ? content : String(content || '')}
           </SyntaxHighlighter>
         </div>
       )}
@@ -403,7 +403,19 @@ const Solutions: React.FC<SolutionsProps> = ({
     setProblemStatementData(
       queryClient.getQueryData(["problem_statement"]) || null
     )
-    setSolutionData(queryClient.getQueryData(["solution"]) || null)
+    
+    // Get solution data and extract the code field
+    const solutionFromCache = queryClient.getQueryData(["solution"]) as {
+      code: string
+      thoughts: string[]
+      time_complexity: string
+      space_complexity: string
+    } | null
+    
+    setSolutionData(solutionFromCache?.code || null)
+    setThoughtsData(solutionFromCache?.thoughts || null)
+    setTimeComplexityData(solutionFromCache?.time_complexity || null)
+    setSpaceComplexityData(solutionFromCache?.space_complexity || null)
 
     const unsubscribe = queryClient.getQueryCache().subscribe((event) => {
       if (event?.query.queryKey[0] === "problem_statement") {

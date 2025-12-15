@@ -18,8 +18,34 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
 }) => {
   const queryClient = useQueryClient()
   const [view, setView] = useState<"queue" | "solutions" | "debug">("queue")
+  const [audioSolution, setAudioSolution] = useState<any>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const { showToast } = useToast()
+
+  const handleAudioQuestionProcessed = (solution: any) => {
+    console.log('SubscribedApp: handleAudioQuestionProcessed called with solution:', solution);
+    
+    // Store the audio solution data and switch to solutions view
+    console.log('SubscribedApp: Setting audioSolution state...');
+    setAudioSolution(solution);
+    
+    console.log('SubscribedApp: Transforming solution data for Solutions component...');
+    // Transform the audio solution to match the expected structure
+    const transformedSolution = {
+      code: solution.content || solution.code || '',
+      thoughts: solution.thoughts || [],
+      time_complexity: solution.time_complexity || 'N/A',
+      space_complexity: solution.space_complexity || 'N/A'
+    };
+    
+    console.log('SubscribedApp: Setting solution data in React Query cache...', transformedSolution);
+    queryClient.setQueryData(["solution"], transformedSolution);
+    
+    console.log('SubscribedApp: Switching view to solutions...');
+    setView("solutions");
+    
+    console.log('SubscribedApp: Audio question processing completed successfully');
+  };
 
   // Let's ensure we reset queries etc. if some electron signals happen
   useEffect(() => {
@@ -114,6 +140,7 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
         queryClient.removeQueries({
           queryKey: ["problem_statement"]
         })
+        setAudioSolution(null) // Clear audio solution on reset
         setView("queue")
       }),
       window.electronAPI.onResetView(() => {
@@ -142,6 +169,7 @@ const SubscribedApp: React.FC<SubscribedAppProps> = ({
           credits={credits}
           currentLanguage={currentLanguage}
           setLanguage={setLanguage}
+          onQuestionProcessed={handleAudioQuestionProcessed}
         />
       ) : view === "solutions" ? (
         <Solutions
