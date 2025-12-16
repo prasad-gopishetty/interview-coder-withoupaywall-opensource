@@ -187,6 +187,15 @@ export class ShortcutsHelper {
       }
     })
     
+    // Toggle DevTools shortcut
+    globalShortcut.register("F12", () => {
+      console.log("F12 pressed. Toggling DevTools.")
+      const mainWindow = this.deps.getMainWindow()
+      if (mainWindow) {
+        mainWindow.webContents.toggleDevTools()
+      }
+    })
+    
     // Unregister shortcuts when quitting
     app.on("will-quit", () => {
       globalShortcut.unregisterAll()
