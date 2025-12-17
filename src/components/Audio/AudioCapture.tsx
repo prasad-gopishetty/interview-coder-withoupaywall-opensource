@@ -49,19 +49,26 @@ export const AudioCapture: React.FC<AudioCaptureProps> = ({
       
       updateAudioLevel();
 
-      // Set up MediaRecorder for audio capture
-      let mimeType = 'audio/webm;codecs=opus';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'audio/webm';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'audio/wav';
-          if (!MediaRecorder.isTypeSupported(mimeType)) {
-            mimeType = ''; // Use default
-          }
+      // Set up MediaRecorder for audio capture with better format detection
+      let mimeType = '';
+      
+      // Try formats in order of OpenAI preference and browser support
+      const preferredTypes = [
+        'audio/wav',
+        'audio/webm;codecs=opus', 
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus'
+      ];
+      
+      for (const type of preferredTypes) {
+        if (MediaRecorder.isTypeSupported(type)) {
+          mimeType = type;
+          break;
         }
       }
       
-      console.log('Using MIME type for MediaRecorder:', mimeType || 'default');
+      console.log('Using MIME type for MediaRecorder:', mimeType || 'default (browser choice)');
       
       const mediaRecorder = mimeType ? 
         new MediaRecorder(stream, { mimeType }) : 
@@ -250,35 +257,59 @@ export const AudioCapture: React.FC<AudioCaptureProps> = ({
     };
   }, []);
 
+  // Add IPC listeners for audio shortcuts
+  useEffect(() => {
+    if (!window.electronAPI?.ipc) return;
+
+    const handleToggleRecording = () => {
+      console.log('Audio shortcut: toggle recording');
+      handleStartInterview();
+    };
+
+    const handleQuickVoiceQuestion = () => {
+      console.log('Audio shortcut: quick voice question');
+      if (!isListening && !isProcessing) {
+        handleStartInterview();
+      }
+    };
+
+    // Listen for IPC events
+    window.electronAPI.ipc.on('audio:toggle-recording', handleToggleRecording);
+    window.electronAPI.ipc.on('audio:quick-voice-question', handleQuickVoiceQuestion);
+
+    // Cleanup listeners
+    return () => {
+      if (window.electronAPI?.ipc) {
+        window.electronAPI.ipc.removeListener('audio:toggle-recording', handleToggleRecording);
+        window.electronAPI.ipc.removeListener('audio:quick-voice-question', handleQuickVoiceQuestion);
+      }
+    };
+  }, [isListening, isProcessing, handleStartInterview]);
+
   const getButtonText = () => {
     if (isProcessing) return 'Processing...';
-    if (isListening) return 'Stop Interview';
-    return 'Start Interview';
+    if (isListening) return 'Stop';
+    return 'Play';
   };
 
   return (
     <div className="flex items-center gap-2">
       {/* Compact Interview Button for horizontal layout */}
-      <Button
+      <button
         onClick={handleStartInterview}
         disabled={isProcessing}
-        className={`px-4 py-1.5 text-sm font-medium transition-all duration-200 ${
-          isListening 
-            ? 'bg-red-500 hover:bg-red-600 text-white' 
-            : 'bg-orange-500 hover:bg-orange-600 text-white'
+        className={`cursor-pointer rounded px-2 py-1.5 hover:bg-white/10 transition-colors ${
+          isProcessing ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >
         {isProcessing ? (
-          <div className="flex items-center gap-1">
+          <div className="flex items-center">
             <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
-            <span>Processing</span>
           </div>
         ) : (
-          <>
-            {isListening ? '🔴 Stop Interview' : '🎤 Start Interview'}
-          </>
+          <span className="text-[11px] leading-none text-white">{isListening ? '⏹' : '▶'}</span>
         )}
-      </Button>
+      </button>
 
       {/* Audio Level Indicator - compact */}
       {isListening && (

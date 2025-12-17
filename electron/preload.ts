@@ -259,6 +259,16 @@ const electronAPI = {
     saveConfig: (config: any) => ipcRenderer.invoke("audio:save-config", config),
     loadConfig: () => ipcRenderer.invoke("audio:load-config"),
     cleanup: () => ipcRenderer.invoke("audio:cleanup")
+  },
+  
+  // Add IPC object for event listening
+  ipc: {
+    on: (channel: string, callback: (...args: any[]) => void) => {
+      ipcRenderer.on(channel, (_event, ...args) => callback(...args))
+    },
+    removeListener: (channel: string, callback: (...args: any[]) => void) => {
+      ipcRenderer.removeListener(channel, callback)
+    }
   }
 }
 

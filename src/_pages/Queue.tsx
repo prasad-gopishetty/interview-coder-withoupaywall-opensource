@@ -161,91 +161,100 @@ const Queue: React.FC<QueueProps> = ({
   
   return (
     <div ref={contentRef} className="bg-transparent">
-      <div className="px-3 py-2">
+      <div className="px-4 py-3">
         {/* Main button row - responsive horizontal layout */}
-        <div className="flex items-center gap-1 sm:gap-2 bg-black/50 rounded-lg px-2 sm:px-3 py-2 border border-white/10 backdrop-blur-sm overflow-hidden">
+        <div className="flex items-center justify-between bg-black/50 rounded-lg px-3 py-3 border border-white/10 backdrop-blur-sm">
           
-          {/* Start Interview Button */}
-          <AudioManager
-            onQuestionProcessed={handleAudioQuestionProcessed}
-            className="flex-shrink-0"
-          />
-          
-          {/* Take Screenshot Button */}
-          <button
-            onClick={async () => {
-              try {
-                await window.electronAPI.triggerScreenshot();
-              } catch (error) {
-                console.error("Error taking screenshot:", error);
-                showToast("Error", "Failed to take screenshot", "error");
-              }
-            }}
-            className="flex items-center gap-1 px-1 sm:px-2 md:px-3 py-1 sm:py-1.5 bg-white/10 hover:bg-white/20 rounded text-white text-xs sm:text-sm font-medium transition-colors flex-shrink min-w-0"
-          >
-            <span className="truncate">Take Screenshot</span>
-          </button>
-          
-          {/* Screenshot Hotkey */}
-          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-            <div className="bg-white/20 rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs text-white/70">⌘</div>
-            <div className="bg-white/20 rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs text-white/70">H</div>
+          {/* Left side controls */}
+          <div className="flex items-center gap-3">
+            {/* Start Interview Button */}
+            <AudioManager
+              onQuestionProcessed={handleAudioQuestionProcessed}
+              className="flex-shrink-0"
+            />
+            
+            {/* Take Screenshot Section */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    await window.electronAPI.triggerScreenshot();
+                  } catch (error) {
+                    console.error("Error taking screenshot:", error);
+                    showToast("Error", "Failed to take screenshot", "error");
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 rounded text-white text-xs font-medium transition-colors"
+              >
+                <span>Screenshot</span>
+              </button>
+              
+              {/* Screenshot Hotkey */}
+              <div className="flex items-center gap-1">
+                <div className="bg-white/20 rounded px-2 py-1 text-xs text-white/70">⌘</div>
+                <div className="bg-white/20 rounded px-2 py-1 text-xs text-white/70">H</div>
+              </div>
+            </div>
           </div>
           
-          {/* Solve Screen Button */}
+          {/* Center controls - Solve functionality */}
           {screenshots.length > 0 && (
-            <button
-              onClick={async () => {
-                try {
-                  const result = await window.electronAPI.triggerProcessScreenshots();
-                  if (!result.success) {
-                    console.error("Failed to process screenshots:", result.error);
+            <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    const result = await window.electronAPI.triggerProcessScreenshots();
+                    if (!result.success) {
+                      console.error("Failed to process screenshots:", result.error);
+                      showToast("Error", "Failed to process screenshots", "error");
+                    }
+                  } catch (error) {
+                    console.error("Error processing screenshots:", error);
                     showToast("Error", "Failed to process screenshots", "error");
                   }
-                } catch (error) {
-                  console.error("Error processing screenshots:", error);
-                  showToast("Error", "Failed to process screenshots", "error");
-                }
-              }}
-              className="flex items-center gap-1 px-1 sm:px-2 md:px-3 py-1 sm:py-1.5 bg-white/10 hover:bg-white/20 rounded text-white text-xs sm:text-sm font-medium transition-colors flex-shrink min-w-0"
-            >
-              <span className="truncate">Solve Screen</span>
-            </button>
-          )}
-          
-          {/* Solve Hotkey */}
-          {screenshots.length > 0 && (
-            <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-              <div className="bg-white/20 rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs text-white/70">⌘</div>
-              <div className="bg-white/20 rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs text-white/70">↵</div>
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 rounded text-white text-xs font-medium transition-colors"
+              >
+                <span>Solve</span>
+              </button>
+              
+              {/* Solve Hotkey */}
+              <div className="flex items-center gap-1">
+                <div className="bg-white/20 rounded px-2 py-1 text-xs text-white/70">⌘</div>
+                <div className="bg-white/20 rounded px-2 py-1 text-xs text-white/70">↑↓</div>
+              </div>
             </div>
           )}
           
-          {/* Show/Hide Button */}
-          <button
-            onClick={async () => {
-              try {
-                await window.electronAPI.toggleMainWindow();
-              } catch (error) {
-                console.error("Error toggling window:", error);
-              }
-            }}
-            className="flex items-center gap-1 px-1 sm:px-2 md:px-3 py-1 sm:py-1.5 bg-white/10 hover:bg-white/20 rounded text-white text-xs sm:text-sm font-medium transition-colors flex-shrink min-w-0"
-          >
-            <span className="truncate">Show/Hide</span>
-          </button>
-          
-          {/* Show/Hide Hotkey */}
-          <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
-            <div className="bg-white/20 rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs text-white/70">⌘</div>
-            <div className="bg-white/20 rounded px-1 sm:px-2 py-0.5 sm:py-1 text-xs text-white/70">B</div>
-          </div>
-          
-          {/* Settings */}
-          <button
-            onClick={handleOpenSettings}
-            className="p-1 sm:p-2 text-white/70 hover:text-white/90 transition-colors flex-shrink-0"
-          >
+          {/* Right side controls */}
+          <div className="flex items-center gap-3">
+            {/* Show/Hide Section */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={async () => {
+                  try {
+                    await window.electronAPI.toggleMainWindow();
+                  } catch (error) {
+                    console.error("Error toggling window:", error);
+                  }
+                }}
+                className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 rounded text-white text-xs font-medium transition-colors"
+              >
+                <span>Hide</span>
+              </button>
+              
+              {/* Show/Hide Hotkey */}
+              <div className="flex items-center gap-1">
+                <div className="bg-white/20 rounded px-2 py-1 text-xs text-white/70">⌘</div>
+                <div className="bg-white/20 rounded px-2 py-1 text-xs text-white/70">B</div>
+              </div>
+            </div>
+            
+            {/* Settings */}
+            <button
+              onClick={handleOpenSettings}
+              className="p-2 text-white/70 hover:text-white/90 transition-colors"
+            >
             <svg
               xmlns="http://www.w3.org/2000/svg"
               viewBox="0 0 24 24"
@@ -254,17 +263,18 @@ const Queue: React.FC<QueueProps> = ({
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="w-3 sm:w-4 h-3 sm:h-4"
-            >
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-          </button>
+                className="w-4 h-4"
+              >
+                <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l-.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+            </button>
+          </div>
         </div>
         
         {/* Screenshots Display */}
         {screenshots.length > 0 && (
-          <div className="mt-3">
+          <div className="mt-4 px-1">
             <ScreenshotQueue
               isLoading={false}
               screenshots={screenshots}

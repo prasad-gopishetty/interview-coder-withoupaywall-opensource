@@ -80,6 +80,12 @@ export interface ElectronAPI {
     loadConfig: () => Promise<any>
     cleanup: () => Promise<{ success: boolean; filesRemoved: number }>
   }
+  
+  // IPC API for event listening
+  ipc: {
+    on: (channel: string, callback: (...args: any[]) => void) => void
+    removeListener: (channel: string, callback: (...args: any[]) => void) => void
+  }
 }
 
 declare global {

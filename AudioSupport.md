@@ -199,7 +199,7 @@ interface TranscriptionDisplayProps {
 
 ## Keyboard Shortcuts Extension
 
-### New Global Shortcuts (Phase 1)
+### Audio Global Shortcuts (Implemented)
 - **Ctrl/Cmd + M**: Toggle voice recording
 - **Ctrl/Cmd + Shift + M**: Quick voice question (record + process immediately)
 

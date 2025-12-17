@@ -177,6 +177,17 @@ export class ShortcutsHelper {
       }
     })
     
+    // Audio shortcuts
+    globalShortcut.register("CommandOrControl+M", () => {
+      console.log("Command/Ctrl + M pressed. Toggling audio recording.")
+      this.deps.toggleAudioRecording()
+    })
+
+    globalShortcut.register("CommandOrControl+Shift+M", () => {
+      console.log("Command/Ctrl + Shift + M pressed. Starting quick voice question.")
+      this.deps.quickVoiceQuestion()
+    })
+
     // Delete last screenshot shortcut
     globalShortcut.register("CommandOrControl+L", () => {
       console.log("Command/Ctrl + L pressed. Deleting last screenshot.")

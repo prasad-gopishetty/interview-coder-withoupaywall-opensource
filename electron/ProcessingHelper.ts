@@ -506,11 +506,34 @@ export class ProcessingHelper {
         // Parse the response
         try {
           const responseText = extractionResponse.choices[0].message.content;
+          console.log('OpenAI response text (first 200 chars):', responseText?.substring(0, 200));
+          
+          // Check if response starts with error messages
+          if (responseText?.toLowerCase().includes("i'm unable") || responseText?.toLowerCase().includes("i cannot") || responseText?.toLowerCase().includes("i can't")) {
+            console.error('OpenAI refused to process the request:', responseText);
+            return {
+              success: false,
+              error: "OpenAI was unable to process the screenshots. Try using clearer images or different screenshots."
+            };
+          }
+          
           // Handle when OpenAI might wrap the JSON in markdown code blocks
           const jsonText = responseText.replace(/```json|```/g, '').trim();
+          
+          // Basic JSON validation before parsing
+          if (!jsonText.startsWith('{') && !jsonText.startsWith('[')) {
+            console.error('Response does not appear to be JSON:', jsonText.substring(0, 100));
+            return {
+              success: false,
+              error: "Received invalid response format. Please try again with clearer screenshots."
+            };
+          }
+          
           problemInfo = JSON.parse(jsonText);
         } catch (error) {
           console.error("Error parsing OpenAI response:", error);
+          const responseText = extractionResponse.choices[0].message.content;
+          console.error("Full response text:", responseText);
           return {
             success: false,
             error: "Failed to parse problem information. Please try again or use clearer screenshots."
@@ -564,9 +587,29 @@ export class ProcessingHelper {
           }
           
           const responseText = responseData.candidates[0].content.parts[0].text;
+          console.log('Gemini response text (first 200 chars):', responseText.substring(0, 200));
+          
+          // Check if response contains error messages
+          if (responseText.toLowerCase().includes("i'm unable") || responseText.toLowerCase().includes("i cannot") || responseText.toLowerCase().includes("i can't")) {
+            console.error('Gemini refused to process the request:', responseText);
+            return {
+              success: false,
+              error: "Gemini was unable to process the screenshots. Try using clearer images or different screenshots."
+            };
+          }
           
           // Handle when Gemini might wrap the JSON in markdown code blocks
           const jsonText = responseText.replace(/```json|```/g, '').trim();
+          
+          // Basic JSON validation
+          if (!jsonText.startsWith('{') && !jsonText.startsWith('[')) {
+            console.error('Gemini response does not appear to be JSON:', jsonText.substring(0, 100));
+            return {
+              success: false,
+              error: "Received invalid response format from Gemini. Please try again with clearer screenshots."
+            };
+          }
+          
           problemInfo = JSON.parse(jsonText);
         } catch (error) {
           console.error("Error using Gemini API:", error);
@@ -612,7 +655,28 @@ export class ProcessingHelper {
           });
 
           const responseText = (response.content[0] as { type: 'text', text: string }).text;
+          console.log('Claude response text (first 200 chars):', responseText.substring(0, 200));
+          
+          // Check if response contains error messages
+          if (responseText.toLowerCase().includes("i'm unable") || responseText.toLowerCase().includes("i cannot") || responseText.toLowerCase().includes("i can't")) {
+            console.error('Claude refused to process the request:', responseText);
+            return {
+              success: false,
+              error: "Claude was unable to process the screenshots. Try using clearer images or different screenshots."
+            };
+          }
+          
           const jsonText = responseText.replace(/```json|```/g, '').trim();
+          
+          // Basic JSON validation
+          if (!jsonText.startsWith('{') && !jsonText.startsWith('[')) {
+            console.error('Claude response does not appear to be JSON:', jsonText.substring(0, 100));
+            return {
+              success: false,
+              error: "Received invalid response format from Claude. Please try again with clearer screenshots."
+            };
+          }
+          
           problemInfo = JSON.parse(jsonText);
         } catch (error: any) {
           console.error("Error using Anthropic API:", error);

@@ -245,24 +245,64 @@ export class AudioHelper {
       
       console.log(`Audio buffer size: ${audioBuffer.length} bytes`);
       
-      // Save to temporary file
-      const tempAudioPath = path.join(this.tempDir, `temp_${Date.now()}.webm`);
-      fs.writeFileSync(tempAudioPath, audioBuffer);
+      // Save original format to temporary file
+      const tempInputPath = path.join(this.tempDir, `temp_input_${Date.now()}.webm`);
+      const tempOutputPath = path.join(this.tempDir, `temp_output_${Date.now()}.wav`);
+      fs.writeFileSync(tempInputPath, audioBuffer);
       
-      console.log(`Saved audio to temporary file: ${tempAudioPath}`);
+      console.log(`Saved input audio to: ${tempInputPath}`);
       
       try {
-        // Use node-fetch with form-data instead of browser APIs
+        // Convert audio to WAV format using ffmpeg (if available) or use original if suitable
+        let audioFileToSend = tempInputPath;
+        let filename = 'audio.webm';
+        let contentType = 'audio/webm';
+        
+        try {
+          // Try to use ffmpeg to convert to WAV for better compatibility
+          const { exec } = require('child_process');
+          await new Promise((resolve, reject) => {
+            exec(`ffmpeg -i "${tempInputPath}" -ar 16000 -ac 1 -acodec pcm_s16le "${tempOutputPath}"`, (error: any) => {
+              if (error) {
+                console.log('FFmpeg not available, using original format:', error.message);
+                // Check if the original file might actually be in a supported format
+                if (audioBuffer.length > 12) {
+                  // Simple heuristic: check for common audio file headers
+                  const header = audioBuffer.subarray(0, 12).toString('ascii', 0, 4);
+                  if (header === 'RIFF' || header.includes('WAV')) {
+                    filename = 'audio.wav';
+                    contentType = 'audio/wav';
+                    console.log('Detected WAV format in original file');
+                  } else if (header.includes('OggS')) {
+                    filename = 'audio.ogg';
+                    contentType = 'audio/ogg';
+                    console.log('Detected OGG format in original file');
+                  }
+                }
+                resolve(null);
+              } else {
+                console.log('Successfully converted audio to WAV format');
+                audioFileToSend = tempOutputPath;
+                filename = 'audio.wav';
+                contentType = 'audio/wav';
+                resolve(null);
+              }
+            });
+          });
+        } catch (conversionError) {
+          console.log('Audio conversion failed, using original format:', conversionError);
+        }
+        // Use node-fetch with form-data
         const FormData = require('form-data');
         const fetch = require('node-fetch');
         
         const formData = new FormData();
         
-        // Read the file and append as stream
-        const audioStream = fs.createReadStream(tempAudioPath);
+        // Read the audio file and append as stream
+        const audioStream = fs.createReadStream(audioFileToSend);
         formData.append('file', audioStream, {
-          filename: 'audio.webm',
-          contentType: 'audio/webm'
+          filename: filename,
+          contentType: contentType
         });
         formData.append('model', 'whisper-1');
         formData.append('response_format', 'json');
@@ -302,7 +342,10 @@ export class AudioHelper {
         
         // Clean up temporary files
         try {
-          fs.unlinkSync(tempAudioPath);
+          fs.unlinkSync(tempInputPath);
+          if (fs.existsSync(tempOutputPath)) {
+            fs.unlinkSync(tempOutputPath);
+          }
         } catch (cleanupError) {
           console.warn('Failed to cleanup temporary audio files:', cleanupError);
         }
@@ -314,7 +357,10 @@ export class AudioHelper {
         
         // Clean up temporary file on error
         try {
-          fs.unlinkSync(tempAudioPath);
+          fs.unlinkSync(tempInputPath);
+          if (fs.existsSync(tempOutputPath)) {
+            fs.unlinkSync(tempOutputPath);
+          }
         } catch (cleanupError) {
           console.warn('Failed to cleanup temporary audio file on error:', cleanupError);
         }

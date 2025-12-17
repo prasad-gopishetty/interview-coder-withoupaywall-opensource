@@ -116,6 +116,8 @@ export interface IShortcutsHelperDeps {
   moveWindowDown: () => void
   toggleClickThrough: () => boolean
   getClickThroughState: () => boolean
+  toggleAudioRecording: () => void
+  quickVoiceQuestion: () => void
 }
 
 export interface IIpcHandlerDeps {
@@ -145,6 +147,22 @@ export interface IIpcHandlerDeps {
 }
 
 // Initialize helpers
+function toggleAudioRecording() {
+  const mainWindow = getMainWindow()
+  if (mainWindow) {
+    console.log("Toggling audio recording via shortcut...")
+    mainWindow.webContents.send("audio:toggle-recording")
+  }
+}
+
+function quickVoiceQuestion() {
+  const mainWindow = getMainWindow()
+  if (mainWindow) {
+    console.log("Starting quick voice question via shortcut...")
+    mainWindow.webContents.send("audio:quick-voice-question")
+  }
+}
+
 function initializeHelpers() {
   state.screenshotHelper = new ScreenshotHelper(state.view)
   state.processingHelper = new ProcessingHelper({
@@ -189,7 +207,9 @@ function initializeHelpers() {
     moveWindowUp: () => moveWindowVertical((y) => y - state.step),
     moveWindowDown: () => moveWindowVertical((y) => y + state.step),
     toggleClickThrough,
-    getClickThroughState
+    getClickThroughState,
+    toggleAudioRecording,
+    quickVoiceQuestion
   } as IShortcutsHelperDeps)
   
   // Initialize AudioHelper with ProcessingHelper - this sets up the IPC handlers
@@ -249,9 +269,9 @@ async function createWindow(): Promise<void> {
   state.currentY = 50
 
   const windowSettings: Electron.BrowserWindowConstructorOptions = {
-    width: 800,
+    width: 650,
     height: 600,
-    minWidth: 750,
+    minWidth: 600,
     minHeight: 550,
     x: state.currentX,
     y: 50,
